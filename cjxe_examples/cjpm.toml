@@ -1,0 +1,15 @@
+[dependencies]
+  cjxe = { path = "../cjxe" }
+
+[package]
+  cjc-version = "0.59.6"
+  compile-option = ""
+  description = "nothing here"
+  link-option = ""
+  name = "cjxe_examples"
+  output-type = "executable"
+  override-compile-option = ""
+  src-dir = ""
+  target-dir = ""
+  version = "1.0.0"
+  package-configuration = {}
