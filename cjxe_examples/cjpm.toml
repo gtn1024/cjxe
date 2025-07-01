@@ -2,7 +2,7 @@
   cjxe = { path = "../cjxe" }
 
 [package]
-  cjc-version = "0.59.6"
+  cjc-version = "1.0.0"
   compile-option = ""
   description = "nothing here"
   link-option = ""
