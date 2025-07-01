@@ -1,5 +1,5 @@
 [package]
-  cjc-version = "0.59.6"
+  cjc-version = "1.0.0"
   compile-option = ""
   description = "A Fast Command Line Argument Parser for Cangjie"
   link-option = ""
