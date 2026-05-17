@@ -666,14 +666,14 @@ public class App {
                 this.reportError("\"${argValue}\" is not a valid value for ${argName}${msg}", true, true)
             }
             if (let Some(av) <- argValue && let Some(o) <- matches.args.get(opt.name)) {
-                o.occurences += 1
+                o.occurrences += 1
                 if (let Some(values) <- o.values) {
                     values.add(av)
                 }
             }
         } else {
             let ma = MatchedArg(opt.name)
-            ma.occurences = if (argValue.isSome()) { 1 } else { 0 }
+            ma.occurrences = if (argValue.isSome()) { 1 } else { 0 }
             let al = ArrayList<String>()
             if (let Some(argValue) <- argValue) {
                 al.add(argValue)
@@ -708,11 +708,11 @@ public class App {
         var done = false
         if (let Some(f) <- matches.args.get(flag.name)) {
             done = true
-            f.occurences = if (flag.multiple) { f.occurences + 1 } else { 1 }
+            f.occurrences = if (flag.multiple) { f.occurrences + 1 } else { 1 }
         }
         if (!done) {
             let ma = MatchedArg(flag.name)
-            ma.occurences = 1
+            ma.occurrences = 1
             matches.args.add(flag.name, ma)
         }
 
@@ -785,11 +785,11 @@ public class App {
             var done = false
             if (let Some(f) <- matches.args.get(flag.name)) {
                 done = true
-                f.occurences = if (flag.multiple) { f.occurences + 1 } else { 1 }
+                f.occurrences = if (flag.multiple) { f.occurrences + 1 } else { 1 }
             }
             if (!done) {
                 let ma = MatchedArg(flag.name)
-                ma.occurences = 1
+                ma.occurrences = 1
                 matches.args.add(flag.name, ma)
             }
 
@@ -848,7 +848,7 @@ public class App {
                 }
             } else {
                 let ma = MatchedArg(v.name)
-                ma.occurences = 0
+                ma.occurrences = 0
                 ma.values = Some(ArrayList())
                 matches.args.add(v.name, ma)
             }
@@ -903,7 +903,7 @@ public class App {
                     if (let Some(values) <- o.values) {
                         values.add(arg)
                     }
-                    o.occurences = if (opt.multiple) { o.occurences + 1 } else { 1 }
+                    o.occurrences = if (opt.multiple) { o.occurrences + 1 } else { 1 }
                 }
 
                 skip = true
@@ -952,7 +952,7 @@ public class App {
                     if (p.multiple) {
                         if (let Some(pos) <- matches.args.get(p.name)) {
                             done = true
-                            pos.occurences += 1
+                            pos.occurrences += 1
                             if (let Some(vals) <- pos.values) {
                                 vals.add(arg)
                             }
@@ -962,7 +962,7 @@ public class App {
                     }
                     if (!done) {
                         let ma = MatchedArg(p.name)
-                        ma.occurences = 1
+                        ma.occurrences = 1
                         ma.values = ArrayList([arg])
                         matches.args.add(p.name, ma)
                     }

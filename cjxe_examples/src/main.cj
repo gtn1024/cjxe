@@ -27,7 +27,7 @@ main() {
         println("Value for config: ${c}")
     }
 
-    match (matches.occurencesOf("debug")) {
+    match (matches.occurrencesOf("debug")) {
         case 0 => println("Debug mode is off")
         case 1 => println("Debug mode is kind of on")
         case 2 => println("Debug mode is on")

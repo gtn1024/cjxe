@@ -85,7 +85,7 @@ func testArgMatchesValuesOf_absent() {
 func testArgMatchesIsPresent_arg() {
     let matches = ArgMatches()
     let ma = MatchedArg("debug")
-    ma.occurences = 1
+    ma.occurrences = 1
     matches.args.add("debug", ma)
 
     @Expect(matches.isPresent("debug"))
@@ -112,11 +112,11 @@ func testArgMatchesIsPresent_absent() {
 func testArgMatchesOccurencesOf() {
     let matches = ArgMatches()
     let ma = MatchedArg("debug")
-    ma.occurences = 3
+    ma.occurrences = 3
     matches.args.add("debug", ma)
 
-    @Expect(matches.occurencesOf("debug") == 3)
-    @Expect(matches.occurencesOf("verbose") == 0)
+    @Expect(matches.occurrencesOf("debug") == 3)
+    @Expect(matches.occurrencesOf("verbose") == 0)
 }
 
 @Test
@@ -124,7 +124,7 @@ func testArgMatchesSubcommandMatches_found() {
     let matches = ArgMatches()
     let subMatches = ArgMatches()
     let subMa = MatchedArg("list")
-    subMa.occurences = 1
+    subMa.occurrences = 1
     subMatches.args.add("list", subMa)
     matches.subcommand = SubCommand("test", subMatches)
 
@@ -199,7 +199,7 @@ func testArgSetters() {
 func testMatchedArgDefaults() {
     let ma = MatchedArg("test")
     @Expect(ma.name == "test")
-    @Expect(ma.occurences == 0)
+    @Expect(ma.occurrences == 0)
     @Expect(ma.values.isNone())
 }
 

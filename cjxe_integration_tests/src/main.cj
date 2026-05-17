@@ -31,7 +31,7 @@ main() {
         .getMatches()
 
     println("config=${matches.valueOf("config").getOrDefault { => "" }}")
-    println("debug=${matches.occurencesOf("debug").toString()}")
+    println("debug=${matches.occurrencesOf("debug").toString()}")
     println("input=${matches.valueOf("input").getOrDefault { => "" }}")
     println("output_present=${matches.isPresent("output")}")
     println("format=${matches.valueOf("format").getOrDefault { => "" }}")

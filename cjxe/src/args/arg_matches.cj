@@ -33,9 +33,9 @@ public class ArgMatches {
         false
     }
 
-    public func occurencesOf(name: String): UInt8 {
+    public func occurrencesOf(name: String): UInt8 {
         if (let Some(arg) <- this.args.get(name)) {
-            return arg.occurences
+            return arg.occurrences
         }
         0
     }
