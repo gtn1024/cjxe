@@ -1,4 +1,4 @@
 [workspace]
-members = ["cjxe", "cjxe_examples"]
-build-members = ["cjxe", "cjxe_examples"]
-test-members = ["cjxe_examples"]
+members = ["cjxe", "cjxe_examples", "cjxe_tests", "cjxe_integration_tests"]
+build-members = ["cjxe", "cjxe_examples", "cjxe_tests", "cjxe_integration_tests"]
+test-members = ["cjxe_examples", "cjxe_tests"]

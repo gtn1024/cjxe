@@ -1,0 +1,15 @@
+[package]
+  cjc-version = "1.0.0"
+  compile-option = ""
+  description = "Tests for cjxe"
+  link-option = ""
+  name = "cjxe_tests"
+  output-type = "static"
+  override-compile-option = ""
+  src-dir = ""
+  target-dir = ""
+  version = "0.1.0"
+  package-configuration = {}
+
+[dependencies]
+  cjxe = { path = "../cjxe" }

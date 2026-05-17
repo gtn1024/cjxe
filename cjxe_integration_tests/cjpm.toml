@@ -1,0 +1,15 @@
+[package]
+  cjc-version = "1.0.0"
+  compile-option = ""
+  description = "Integration tests for cjxe"
+  link-option = ""
+  name = "cjxe_integration_tests"
+  output-type = "executable"
+  override-compile-option = ""
+  src-dir = ""
+  target-dir = ""
+  version = "0.1.0"
+  package-configuration = {}
+
+[dependencies]
+  cjxe = { path = "../cjxe" }
