@@ -299,7 +299,7 @@ public class App {
             this._flags.add("hcjxe_help", arg)
         }
         if (this._needsLongVersion) {
-            let arg = FlagBuilder("vclap_version")
+            let arg = FlagBuilder("vcjxe_version")
             arg.long = "version"
             arg.help = "Prints version information"
             if (this._needsShortVersion) {
