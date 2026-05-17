@@ -28,7 +28,7 @@ main() {
             .about("adds things")
             .arg(Arg(name: "verbose", short: r'v', long: "verbose")
                 .setHelp("Verbose output")))
-        .getMatches()
+        .getMatchesOrExit()
 
     println("config=${matches.valueOf("config").getOrDefault { => "" }}")
     println("debug=${matches.occurrencesOf("debug").toString()}")

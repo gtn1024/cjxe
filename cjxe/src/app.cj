@@ -80,14 +80,14 @@ public class App {
         let i = arg.index.getOrDefault { => UInt8(this._positionalIdx.size + 1) }
 
         if (arg.short.isSome() || arg.long.isSome()) {
-            this.reportError("Argument \"${arg.name}\" has conflicting requirements, both index() and short(), or long(), were supplied", true, true)
+            this.reportError("Argument \"${arg.name}\" has conflicting requirements, both index() and short(), or long(), were supplied", true)
         }
 
         if (this._positionalIdx.contains(i)) {
-            this.reportError("Argument \"${arg.name}\" has the same index as another positional argument", true, true)
+            this.reportError("Argument \"${arg.name}\" has the same index as another positional argument", true)
         }
         if (arg.takesValue) {
-            this.reportError("Argument \"${arg.name}\" has conflicting requirements, both index() and takes_value(true) were supplied", true, true)
+            this.reportError("Argument \"${arg.name}\" has conflicting requirements, both index() and takes_value(true) were supplied", true)
         }
 
         let pb = PositionalBuilder(arg.name)
@@ -107,7 +107,7 @@ public class App {
         if (let Some(r) <- arg.requires) {
             let rhs = HashSet<String>()
             // without derefing n = &&str
-            for (n in r) { 
+            for (n in r) {
                 rhs.add(n)
             }
             pb.requires = Some(rhs)
@@ -126,7 +126,7 @@ public class App {
 
     private func handleOptionArg(arg: Arg): Unit {
         if (arg.short.isNone() && arg.long.isNone()) {
-            this.reportError("Argument \"${arg.name}\" has conflicting requirements, neither short(), and long(), were supplied", true, true)
+            this.reportError("Argument \"${arg.name}\" has conflicting requirements, neither short(), and long(), were supplied", true)
         }
         let ob = OptionBuilder(arg.name)
         ob.short = arg.short
@@ -160,13 +160,13 @@ public class App {
 
     private func handleFlagArg(arg: Arg): Unit {
         if (arg.short.isNone() && arg.long.isNone()) {
-            this.reportError("Argument \"${arg.name}\" has conflicting requirements, neither short(), and long(), were supplied", true, true)
+            this.reportError("Argument \"${arg.name}\" has conflicting requirements, neither short(), and long(), were supplied", true)
         }
         if (arg.required) {
-            this.reportError("Argument \"${arg.name}\" has conflicting requirements, because it has no index() or takesValue(true)", true, true)
+            this.reportError("Argument \"${arg.name}\" has conflicting requirements, because it has no index() or takesValue(true)", true)
         }
         if (arg.possibleValues.isSome()) {
-            this.reportError("Argument \"${arg.name}\" cannot have a specific value set because it doesn't have takesValue(true) set", true, true)
+            this.reportError("Argument \"${arg.name}\" cannot have a specific value set because it doesn't have takesValue(true) set", true)
         }
 
         let fb = FlagBuilder(arg.name)
@@ -193,13 +193,13 @@ public class App {
 
     public func arg(arg: Arg): App {
         if (this._argList.contains(arg.name)) {
-            this.reportError("Argument \"${arg.name}\" is already defined", true, true)
+            this.reportError("Argument \"${arg.name}\" is already defined", true)
         } else {
             this._argList.add(arg.name)
         }
         if (let Some(short) <- arg.short) {
             if (this._shortList.contains(short)) {
-                this.reportError("Short argument \"-${short}\" is already defined", true, true)
+                this.reportError("Short argument \"-${short}\" is already defined", true)
             } else {
                 this._shortList.add(short)
             }
@@ -211,7 +211,7 @@ public class App {
         }
         if (let Some(long) <- arg.long) {
             if (this._longList.contains(long)) {
-                this.reportError("Long argument \"--${long}\" is already defined", true, true)
+                this.reportError("Long argument \"--${long}\" is already defined", true)
             } else {
                 this._longList.add(long)
             }
@@ -242,14 +242,18 @@ public class App {
     }
 
     public func getMatches(): ArgMatches {
+        let args = getCommandLine()
+        this._binName = Some("testapp")
+        return this.getMatchesFrom(args.toArray())
+    }
+
+    public func getMatchesFrom(args: Array<String>): ArgMatches {
         this.verifyPositionals()
         for (sc in this._subcommands.values()) {
             sc.verifyPositionals()
         }
 
         let matches = ArgMatches()
-
-        let args = getCommandLine()
         let it = args.iterator()
         if (let Some(name) <- it.next()) {
             try {
@@ -263,14 +267,28 @@ public class App {
         matches
     }
 
+    public func getMatchesOrExit(): ArgMatches {
+        try {
+            return this.getMatches()
+        } catch (e: ArgError) {
+            if (e.message.size > 0) {
+                println(e.message)
+            }
+            if (e.showUsage) {
+                this.printUsage(true)
+            }
+            exit(1)
+        }
+    }
+
     func verifyPositionals() {
         if (let Some((idx, p)) <- this._positionalIdx.last) {
             if (idx != UInt8(this._positionalIdx.size)) {
-                this.reportError("Positional argument \"${p.name}\" has an index that is not the last index", true, true)
+                this.reportError("Positional argument \"${p.name}\" has an index that is not the last index", true)
             }
         }
         if (let Some(p) <- this._positionalIdx.values().iterator().filter { a => a.multiple}.filter { a => a.index != UInt8(this._positionalIdx.size) }.first()) {
-            this.reportError("Positional argument \"${p.name}\" is not the last positional argument", true, true)
+            this.reportError("Positional argument \"${p.name}\" is not the last positional argument", true)
         }
 
         var found = false
@@ -429,7 +447,7 @@ public class App {
     }
 
     func printHelp() {
-        this.printVersion(false)
+        this.printVersion()
         let flags = !this._flags.isEmpty()
         let pos = !this._positionalIdx.isEmpty()
         let opts = !this._opts.isEmpty()
@@ -442,7 +460,7 @@ public class App {
             }
         }
         var longestOpt = 0
-        for (ol in this._opts.values().iterator().filterMap { o => 
+        for (ol in this._opts.values().iterator().filterMap { o =>
             if (o.long.isSome()) {
                 let mult = if (o.multiple) { 3 } else { 0 }
                 Some(o.long.getOrThrow().size + mult + o.name.size + 3)
@@ -534,11 +552,8 @@ public class App {
         }
     }
 
-    func printVersion(quit: Bool) {
+    func printVersion() {
         println("${this._name} ${this._version.getOrDefault { => "" }}")
-        if (quit) {
-            exit(0)
-        }
     }
 
     func printUsage(moreInfo: Bool) {
@@ -574,7 +589,7 @@ public class App {
                     found = true
                 }
             }
-            
+
             let requiredPositionalArgs = this._positionalIdx.values().iterator().filterMap { p =>
                 if (p.required || matchedPosReqs.contains(p.name)) {
                     if (p.multiple) {
@@ -645,25 +660,19 @@ public class App {
         usage.toString()
     }
 
-    func reportError(msg: String, usage: Bool, quit: Bool) {
-        println(msg)
-        if (usage) {
-            printUsage(true)
-        }
-        if (quit) {
-            exit(1)
-        }
+    func reportError(msg: String, usage: Bool) {
+        throw ArgError(msg, showUsage: usage)
     }
 
     func parseOptions(matches: ArgMatches, argName: ?String, argValue: ?String, opt: OptionBuilder): ?String {
         if (matches.args.contains(opt.name)) {
             if (!opt.multiple) {
-                this.reportError("Argument \"${argName}\" cannot be specified more than once", true, true)
+                this.reportError("Argument \"${argName}\" cannot be specified more than once", true)
             }
             if (let Some(pVals) <- opt.possibleValues && let Some(argValue) <- argValue && !pVals.contains(argValue))  {
                 let validOpts = String.join(pVals.toArray(), delimiter: ", ")
                 let msg = "\n    ${argName} requires one of ${validOpts}\n"
-                this.reportError("\"${argValue}\" is not a valid value for ${argName}${msg}", true, true)
+                this.reportError("\"${argValue}\" is not a valid value for ${argName}${msg}", true)
             }
             if (let Some(av) <- argValue && let Some(o) <- matches.args.get(opt.name)) {
                 o.occurrences += 1
@@ -702,7 +711,7 @@ public class App {
 
     func parseFlags(matches: ArgMatches, argName: ?String, flag: FlagBuilder): ?String {
         if (matches.args.contains(flag.name) && !flag.multiple) {
-            this.reportError("Argument \"${argName}\" cannot be specified more than once", true, true)
+            this.reportError("Argument \"${argName}\" cannot be specified more than once", true)
         }
 
         var done = false
@@ -736,7 +745,8 @@ public class App {
         if (arg == "help" && this._needsLongHelp) {
             this.printHelp()
         } else if (arg == "version" && this._needsLongVersion) {
-            this.printVersion(true)
+            this.printVersion()
+            exit(0)
         }
 
         var argVal: ?String = None
@@ -745,14 +755,14 @@ public class App {
             let args = arg.split("=")
             arg = args[0]
             if (args[1].size == 0) {
-                this.reportError("Argument \"${arg}\" requires a value", true, true)
+                this.reportError("Argument \"${arg}\" requires a value", true)
             }
             argVal = Some(args[1])
         }
         let argName = arg
         let argValue = argVal
 
-        if (let Some(opt) <- this._opts.values().iterator().filter { opt => opt.long.isSome() }.filter { opt => opt.long == argName }.first()) { 
+        if (let Some(opt) <- this._opts.values().iterator().filter { opt => opt.long.isSome() }.filter { opt => opt.long == argName }.first()) {
             return this.parseOptions(matches, argName, argValue, opt)
         }
 
@@ -760,7 +770,7 @@ public class App {
             return this.parseFlags(matches, argName, flag)
         }
 
-        this.reportError("Argument \"${argName}\" is not recognized", true, true)
+        this.reportError("Argument \"${argName}\" is not recognized", true)
         None
     }
 
@@ -768,18 +778,19 @@ public class App {
         if (arg == r'h' && this._needsShortHelp) {
             this.printHelp();
         } else if (arg == r'v' && this._needsShortVersion) {
-            this.printVersion(true);
+            this.printVersion()
+            exit(0)
         }
     }
 
     func parseSingleShortFlag(matches: ArgMatches, arg: Rune): Bool {
         if (let Some(flag) <- this._flags.values().iterator().filter { flag => flag.short == arg}.first()) {
             if (this._blacklist.contains(flag.name)) {
-                this.reportError("Argument \"-${arg} cannot be used with one or more of the other specified arguments", true, true)
+                this.reportError("Argument \"-${arg} cannot be used with one or more of the other specified arguments", true)
             }
 
             if (matches.args.contains(flag.name) && !flag.multiple) {
-                this.reportError("Argument \"-${arg}\" cannot be specified more than once", true, true)
+                this.reportError("Argument \"-${arg}\" cannot be specified more than once", true)
             }
 
             var done = false
@@ -823,7 +834,7 @@ public class App {
             for (c in arg.runes()) {
                 this.checkForHelpAndVersion(c)
                 if (!this.parseSingleShortFlag(matches, c)) {
-                    this.reportError("Argument -${arg} is not valid", true, true)
+                    this.reportError("Argument -${arg} is not valid", true)
                 }
             }
             return None
@@ -839,12 +850,12 @@ public class App {
 
         if (let Some(v) <- this._opts.values().iterator().filter { opt => opt.short == argC}.first()) {
             if (this._blacklist.contains(v.name)) {
-                this.reportError("Argument \"-${argC}\" cannot be used with one or more of the other specified arguments", true, true)
+                this.reportError("Argument \"-${argC}\" cannot be used with one or more of the other specified arguments", true)
             }
 
             if (matches.args.contains(v.name)) {
                 if (!v.multiple) {
-                    this.reportError("Argument \"-${argC}\" cannot be specified more than once", true, true)
+                    this.reportError("Argument \"-${argC}\" cannot be specified more than once", true)
                 }
             } else {
                 let ma = MatchedArg(v.name)
@@ -873,7 +884,7 @@ public class App {
             return Some(v.name)
         }
 
-        this.reportError("Argument -${arg} is not valid", true, true)
+        this.reportError("Argument -${arg} is not valid", true)
         None
     }
 
@@ -896,7 +907,7 @@ public class App {
                         }
                         let validOpts = String.join(pvals.toArray(), delimiter: ", ")
                         let msg = "\n    ${optName} requires one of ${validOpts}\n"
-                        this.reportError("\"${arg}\" is not a valid value for ${optName}${msg}", true, true)
+                        this.reportError("\"${arg}\" is not a valid value for ${optName}${msg}", true)
                     }
                 }
                 if (let Some(o) <- matches.args.get(opt.name)) {
@@ -934,11 +945,11 @@ public class App {
                 }
 
                 if (this._positionalIdx.isEmpty()) {
-                    this.reportError("Argument \"${arg}\" is not recognized", true, true)
+                    this.reportError("Argument \"${arg}\" is not recognized", true)
                 }
                 if (let Some(p) <- this._positionalIdx.get(posCounter)) {
                     if (this._blacklist.contains(p.name)) {
-                        this.reportError("Argument \"${arg}\" cannot be used with one or more of the other specified arguments", true, true)
+                        this.reportError("Argument \"${arg}\" cannot be used with one or more of the other specified arguments", true)
                     }
 
                     if (let Some(pVals) <- p.possibleValues && !pVals.isEmpty() && !pVals.contains(arg)) {
@@ -946,7 +957,7 @@ public class App {
                             acc.append(" ${name}")
                             acc
                         }.toString()
-                        this.reportError("\"${arg}\" isn't a valid value for ${p.name}\n    [valid values:${validOpts}]", true, true)
+                        this.reportError("\"${arg}\" isn't a valid value for ${p.name}\n    [valid values:${validOpts}]", true)
                     }
                     var done = false
                     if (p.multiple) {
@@ -985,17 +996,17 @@ public class App {
                         }
                     }
                 } else {
-                    this.reportError("Argument \"${arg}\" is not recognized", true, true)
+                    this.reportError("Argument \"${arg}\" is not recognized", true)
                 }
             }
         }
         match (needsValueOf) {
-            case Some(nvo) => this.reportError("Argument \"${nvo}\" requires a value", true, true)
+            case Some(nvo) => this.reportError("Argument \"${nvo}\" requires a value", true)
             case _ =>()
         }
 
         if (!this._required.isEmpty()) {
-            this.reportError("One or more required arguments were not specified", true, true)
+            this.reportError("One or more required arguments were not specified", true)
         }
 
         matches.usage = Some(this.createUsage())

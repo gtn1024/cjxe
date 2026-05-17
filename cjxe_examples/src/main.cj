@@ -17,7 +17,7 @@ main() {
             .about("does testing things")
             .arg(Arg(name: "list", short: r"l", long: "list").setHelp("Lists test vcalues"))
         )
-        .getMatches()
+        .getMatchesOrExit()
     
     if (let Some(o) <- matches.valueOf("output")) {
         println("Value for output: ${o}")

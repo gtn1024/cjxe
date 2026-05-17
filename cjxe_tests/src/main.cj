@@ -5,6 +5,7 @@ import std.unittest.testmacro.*
 import std.collection.{ArrayList, HashMap}
 
 import cjxe.args.{Arg, ArgMatches, MatchedArg, SubCommand}
+import cjxe.{App, ArgError}
 
 @Test
 func testArgMatchesValueOf_present() {
@@ -215,4 +216,138 @@ func testSubCommandConstruction() {
     let result = matches.subcommandMatches("build")
     @Expect(result.isSome())
     @Expect(result.getOrThrow().isPresent("list"))
+}
+
+func buildTestApp(): App {
+    App("testapp")
+        .version("1.0.0")
+        .about("A test app")
+        .arg(Arg(name: "config", short: r'c', long: "config")
+            .setHelp("Config file")
+            .setTakesValue(true))
+        .arg(Arg(name: "debug", short: r'd', long: "debug")
+            .setMultiple(true)
+            .setHelp("Debug mode"))
+        .arg(Arg(name: "input")
+            .setHelp("Input file")
+            .setIndex(1))
+        .arg(Arg(name: "format", short: r'f', long: "format")
+            .setTakesValue(true)
+            .setPossibleValues(["json", "xml", "yaml"]))
+        .arg(Arg(name: "required", short: r'r', long: "required")
+            .setTakesValue(true)
+            .setRequired(true))
+        .subcommand(App("add")
+            .about("adds things")
+            .arg(Arg(name: "verbose", short: r'v', long: "verbose")
+                .setHelp("Verbose output")))
+}
+
+@Test
+func testParseOptionShortValue() {
+    let app = buildTestApp()
+    let matches = app.getMatchesFrom(["testapp", "-r", "req", "-c", "myconfig.toml"])
+    @Expect(matches.valueOf("config").getOrThrow() == "myconfig.toml")
+    @Expect(matches.valueOf("required").getOrThrow() == "req")
+}
+
+@Test
+func testParseOptionLongEquals() {
+    let app = buildTestApp()
+    let matches = app.getMatchesFrom(["testapp", "-r", "req", "--config=app.conf"])
+    @Expect(matches.valueOf("config").getOrThrow() == "app.conf")
+}
+
+@Test
+func testParseOptionLongSpace() {
+    let app = buildTestApp()
+    let matches = app.getMatchesFrom(["testapp", "-r", "req", "--config", "app.conf"])
+    @Expect(matches.valueOf("config").getOrThrow() == "app.conf")
+}
+
+@Test
+func testParseMultipleFlags() {
+    let app = buildTestApp()
+    let matches = app.getMatchesFrom(["testapp", "-r", "req", "-ddd"])
+    @Expect(matches.occurrencesOf("debug") == 3)
+}
+
+@Test
+func testParseMultipleFlagsSeparate() {
+    let app = buildTestApp()
+    let matches = app.getMatchesFrom(["testapp", "-r", "req", "-d", "-d"])
+    @Expect(matches.occurrencesOf("debug") == 2)
+}
+
+@Test
+func testParsePositional() {
+    let app = buildTestApp()
+    let matches = app.getMatchesFrom(["testapp", "-r", "req", "data.txt"])
+    @Expect(matches.valueOf("input").getOrThrow() == "data.txt")
+}
+
+@Test
+func testParseSubcommand() {
+    let app = buildTestApp()
+    let matches = app.getMatchesFrom(["testapp", "-r", "req", "add", "-v"])
+    let sub = matches.subcommandMatches("add").getOrThrow()
+    @Expect(sub.isPresent("verbose"))
+}
+
+@Test
+func testParseValidPossibleValue() {
+    let app = buildTestApp()
+    let matches = app.getMatchesFrom(["testapp", "-r", "req", "-f", "json"])
+    @Expect(matches.valueOf("format").getOrThrow() == "json")
+}
+
+@Test
+func testParseDoubleDash() {
+    let app = buildTestApp()
+    let matches = app.getMatchesFrom(["testapp", "-r", "req", "--", "data.txt"])
+    @Expect(matches.valueOf("input").getOrThrow() == "data.txt")
+}
+
+@Test
+func testParseFlagPresent() {
+    let app = buildTestApp()
+    let matches = app.getMatchesFrom(["testapp", "-r", "req", "-d"])
+    @Expect(matches.isPresent("debug"))
+    @Expect(matches.occurrencesOf("debug") == 1)
+}
+
+@Test
+func testParseErrorMissingRequired() {
+    let app = buildTestApp()
+    var caught = false
+    try {
+        app.getMatchesFrom(["testapp", "-c", "conf"])
+    } catch (e: ArgError) {
+        caught = true
+    }
+    @Expect(caught)
+}
+
+@Test
+func testParseErrorInvalidPossibleValue() {
+    let app = buildTestApp()
+    var caught = false
+    try {
+        app.getMatchesFrom(["testapp", "-r", "req", "-f", "csv"])
+    } catch (e: ArgError) {
+        caught = true
+    }
+    @Expect(caught)
+}
+
+@Test
+func testParseErrorUnknownArg() {
+    let app = buildTestApp()
+    var caught = false
+    try {
+        app.getMatchesFrom(["testapp", "-r", "req", "--unknown"])
+    } catch (e: ArgError) {
+        caught = true
+    }
+    @Expect(caught)
 }
