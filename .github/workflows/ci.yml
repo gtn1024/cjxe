@@ -21,3 +21,8 @@ jobs:
       - name: test
         shell: bash
         run: cjpm test
+      - name: integration test
+        shell: bash
+        run: |
+          cjpm build -m cjxe_integration_tests
+          bash cjxe_integration_tests/run_tests.sh target/release/bin/cjxe_integration_tests
