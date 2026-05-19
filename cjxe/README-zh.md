@@ -114,6 +114,7 @@ main() {
 | `setBlacklist(blacklist: Array<String>): Arg` | 设置互斥参数 |
 | `setPossibleValues(possibleValues: Array<String>): Arg` | 限制为指定有效值 |
 | `setRequires(requires: Array<String>): Arg` | 设置必须同时存在的参数 |
+| `setDefault(value: String): Arg` | 设置默认值，当参数未提供时返回该值 |
 
 ### ArgMatches
 

@@ -15,6 +15,7 @@
 - **Subcommands**: Supports nested subcommands with their own arguments
 - **Positional arguments**: Index-based positional arguments with multiple-value support
 - **Validation**: Possible values, required arguments, mutual exclusion, and argument dependencies
+- **Default values**: Set defaults for options and positional arguments, displayed in help output
 - **Error handling**: `ArgError` exception with usage hints
 
 ## Prerequisites

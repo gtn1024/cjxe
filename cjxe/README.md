@@ -114,6 +114,7 @@ Defines a single argument (flag, option, or positional).
 | `setBlacklist(blacklist: Array<String>): Arg` | Sets mutually exclusive arguments |
 | `setPossibleValues(possibleValues: Array<String>): Arg` | Restricts to a set of valid values |
 | `setRequires(requires: Array<String>): Arg` | Sets arguments that must also be present |
+| `setDefault(value: String): Arg` | Sets a default value returned when the argument is not provided |
 
 ### ArgMatches
 
