@@ -25,7 +25,7 @@
 
 ```toml
 [dependencies]
-  cjxe = { git = "https://github.com/gtn1024/cjxe.git", tag = "0.2.0" }
+  cjxe = "0.3.0"
 ```
 
 ## 快速入门
