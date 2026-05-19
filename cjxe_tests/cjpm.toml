@@ -1,5 +1,5 @@
 [package]
-  cjc-version = "1.0.0"
+  cjc-version = "1.1.0"
   compile-option = ""
   description = "Tests for cjxe"
   link-option = ""
