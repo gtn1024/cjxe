@@ -185,6 +185,7 @@ func testArgSetters() {
         .setBlacklist(["config"])
         .setPossibleValues(["json", "xml"])
         .setRequires(["config"])
+        .setDefault("out.txt")
 
     @Expect(arg.help.getOrThrow() == "Output file")
     @Expect(arg.required)
@@ -194,6 +195,23 @@ func testArgSetters() {
     @Expect(arg.blacklist.getOrThrow().size == 1)
     @Expect(arg.possibleValues.getOrThrow().size == 2)
     @Expect(arg.requires.getOrThrow().size == 1)
+    @Expect(arg.defaultValue.getOrThrow() == "out.txt")
+}
+
+@Test
+func testArgSetDefault() {
+    let arg = Arg(name: "port", short: r'p', long: "port")
+        .setTakesValue(true)
+        .setDefault("8080")
+    @Expect(arg.defaultValue.isSome())
+    @Expect(arg.defaultValue.getOrThrow() == "8080")
+}
+
+@Test
+func testArgSetDefaultNone() {
+    let arg = Arg(name: "port", short: r'p', long: "port")
+        .setTakesValue(true)
+    @Expect(arg.defaultValue.isNone())
 }
 
 @Test
@@ -350,4 +368,118 @@ func testParseErrorUnknownArg() {
         caught = true
     }
     @Expect(caught)
+}
+
+@Test
+func testDefaultFlagError() {
+    var caught = false
+    try {
+        App("app").arg(Arg(name: "verbose", short: r'v').setDefault("true"))
+    } catch (e: ArgError) {
+        caught = true
+    }
+    @Expect(caught)
+}
+
+@Test
+func testValueOfReturnsDefault() {
+    let app = App("app")
+        .arg(Arg(name: "port", short: r'p', long: "port")
+            .setTakesValue(true)
+            .setDefault("8080"))
+    let matches = app.getMatchesFrom(["app"])
+    let result = matches.valueOf("port")
+    @Expect(result.isSome())
+    @Expect(result.getOrThrow() == "8080")
+}
+
+@Test
+func testValueOfUserValueOverDefault() {
+    let app = App("app")
+        .arg(Arg(name: "port", short: r'p', long: "port")
+            .setTakesValue(true)
+            .setDefault("8080"))
+    let matches = app.getMatchesFrom(["app", "-p", "3000"])
+    let result = matches.valueOf("port")
+    @Expect(result.isSome())
+    @Expect(result.getOrThrow() == "3000")
+}
+
+@Test
+func testValuesOfReturnsDefault() {
+    let app = App("app")
+        .arg(Arg(name: "tag", short: r't', long: "tag")
+            .setTakesValue(true)
+            .setMultiple(true)
+            .setDefault("latest"))
+    let matches = app.getMatchesFrom(["app"])
+    let result = matches.valuesOf("tag")
+    @Expect(result.isSome())
+    let arr = result.getOrThrow()
+    @Expect(arr.size == 1)
+    @Expect(arr[0] == "latest")
+}
+
+@Test
+func testValuesOfUserValuesOverDefault() {
+    let app = App("app")
+        .arg(Arg(name: "tag", short: r't', long: "tag")
+            .setTakesValue(true)
+            .setMultiple(true)
+            .setDefault("latest"))
+    let matches = app.getMatchesFrom(["app", "-t", "v1", "-t", "v2"])
+    let result = matches.valuesOf("tag")
+    @Expect(result.isSome())
+    let arr = result.getOrThrow()
+    @Expect(arr.size == 2)
+    @Expect(arr[0] == "v1")
+    @Expect(arr[1] == "v2")
+}
+
+@Test
+func testIsPresentUnaffectedByDefault() {
+    let app = App("app")
+        .arg(Arg(name: "port", short: r'p', long: "port")
+            .setTakesValue(true)
+            .setDefault("8080"))
+    let matches = app.getMatchesFrom(["app"])
+    @Expect(!matches.isPresent("port"))
+    @Expect(matches.valueOf("port").getOrThrow() == "8080")
+}
+
+@Test
+func testIsPresentTrueWhenUserProvidesArg() {
+    let app = App("app")
+        .arg(Arg(name: "port", short: r'p', long: "port")
+            .setTakesValue(true)
+            .setDefault("8080"))
+    let matches = app.getMatchesFrom(["app", "-p", "3000"])
+    @Expect(matches.isPresent("port"))
+    @Expect(matches.valueOf("port").getOrThrow() == "3000")
+}
+
+@Test
+func testPositionalDefault() {
+    let app = App("app")
+        .arg(Arg(name: "file")
+            .setIndex(1)
+            .setDefault("input.txt"))
+    let matches = app.getMatchesFrom(["app"])
+    let result = matches.valueOf("file")
+    @Expect(result.isSome())
+    @Expect(result.getOrThrow() == "input.txt")
+    @Expect(!matches.isPresent("file"))
+}
+
+@Test
+func testPositionalDefaultUserOverride() {
+    let app = App("app")
+        .arg(Arg(name: "file")
+            .setIndex(1)
+            .setDefault("input.txt"))
+    let matches = app.getMatchesFrom(["app", "custom.txt"])
+    let result = matches.valueOf("file")
+    @Expect(result.isSome())
+    @Expect(result.getOrThrow() == "custom.txt")
+    @Expect(matches.isPresent("file"))
 }

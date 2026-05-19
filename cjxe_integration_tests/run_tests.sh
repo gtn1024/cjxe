@@ -88,6 +88,21 @@ run_test "invalid_possible_value" 1 -r req -f csv
 # Test: valid possible value
 run_test_with_check "valid_possible_value" 0 "format=json" -r req -f json
 
+# Test: default value for option (not provided)
+run_test_with_check "option_default_not_provided" 0 "port=8080" -r req
+
+# Test: default value for option (user overrides)
+run_test_with_check "option_default_user_override" 0 "port=3000" -r req -P 3000
+
+# Test: default value for positional (not provided)
+run_test_with_check "positional_default_not_provided" 0 "mode=dev" -r req
+
+# Test: default value for positional (user overrides)
+run_test_with_check "positional_default_user_override" 0 "mode=prod" -r req data.txt prod
+
+# Test: default value shown in help
+run_test_with_check "help_shows_default" 0 "default: 8080" --help
+
 # Test: double dash separator
 run_test_with_check "double_dash" 0 "input=output.txt" -r req -- output.txt
 

@@ -12,6 +12,7 @@ public class Arg {
     public var blacklist: ?Array<String> = None
     public var possibleValues: ?Array<String> = None
     public var requires: ?Array<String> = None
+    public var defaultValue: ?String = None
 
     public init(name!: String, short!: ?Rune = None, long!: ?String = None) {
         this.name = name
@@ -56,6 +57,11 @@ public class Arg {
 
     public func setRequires(requires: Array<String>): Arg {
         this.requires = requires
+        this
+    }
+
+    public func setDefault(value: String): Arg {
+        this.defaultValue = Some(value)
         this
     }
 }

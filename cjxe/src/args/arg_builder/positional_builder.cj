@@ -11,6 +11,7 @@ public class PositionalBuilder {
     public var blacklist: ?HashSet<String> = None
     public var possibleValues: ?TreeSet<String> = None
     public var index: UInt8 = 0
+    public var defaultValue: ?String = None
 
     public init(name: String) {
         this.name = name

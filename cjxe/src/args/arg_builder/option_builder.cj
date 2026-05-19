@@ -12,6 +12,7 @@ public class OptionBuilder {
     public var required: Bool = false
     public var possibleValues: ?TreeSet<String> = None
     public var requires: ?HashSet<String> = None
+    public var defaultValue: ?String = None
 
     public init(name: String) {
         this.name = name

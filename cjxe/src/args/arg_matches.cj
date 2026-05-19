@@ -6,10 +6,14 @@ public class ArgMatches {
     public let args: HashMap<String, MatchedArg> = HashMap()
     public var usage: ?String = None
     public var subcommand: ?SubCommand = None
+    public let defaults: HashMap<String, String> = HashMap()
 
     public func valueOf(name: String): ?String {
         if (let Some(arg) <- this.args.get(name) && let Some(values) <- arg.values && let Some(value) <- values.first) {
             return Some(value)
+        }
+        if (let Some(defaultValue) <- this.defaults.get(name)) {
+            return Some(defaultValue)
         }
         None
     }
@@ -17,6 +21,9 @@ public class ArgMatches {
     public func valuesOf(name: String):?Array<String> {
         if (let Some(arg) <- this.args.get(name) && let Some(values) <- arg.values) {
             return Some(values.toArray())
+        }
+        if (let Some(defaultValue) <- this.defaults.get(name)) {
+            return Some([defaultValue])
         }
         None
     }

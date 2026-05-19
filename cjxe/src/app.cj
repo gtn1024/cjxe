@@ -121,6 +121,7 @@ public class App {
             }
             pb.possibleValues = Some(phs)
         }
+        pb.defaultValue = arg.defaultValue
         this._positionalIdx.add(i, pb)
     }
 
@@ -155,6 +156,7 @@ public class App {
             }
             ob.possibleValues = Some(phs)
         }
+        ob.defaultValue = arg.defaultValue
         this._opts.add(arg.name, ob)
     }
 
@@ -167,6 +169,9 @@ public class App {
         }
         if (arg.possibleValues.isSome()) {
             this.reportError("Argument \"${arg.name}\" cannot have a specific value set because it doesn't have takesValue(true) set", true)
+        }
+        if (arg.defaultValue.isSome()) {
+            this.reportError("Argument \"${arg.name}\" cannot have a default value because it is a flag", true)
         }
 
         let fb = FlagBuilder(arg.name)
@@ -254,6 +259,16 @@ public class App {
         }
 
         let matches = ArgMatches()
+        for (opt in this._opts.values()) {
+            if (let Some(dv) <- opt.defaultValue) {
+                matches.defaults.add(opt.name, dv)
+            }
+        }
+        for (p in this._positionalIdx.values()) {
+            if (let Some(dv) <- p.defaultValue) {
+                matches.defaults.add(p.name, dv)
+            }
+        }
         let it = args.iterator()
         if (let Some(name) <- it.next()) {
             try {
@@ -393,6 +408,9 @@ public class App {
                     }
                     sb.append(" [values:${pvStr.toString()}]")
                 }
+                if (let Some(dv) <- v.defaultValue) {
+                    sb.append(" [default: ${dv}]")
+                }
             } else {
                 sb.append(tab)
             }
@@ -421,6 +439,9 @@ public class App {
                         acc
                     }
                     sb.append(" [values:${pvStr.toString()}]")
+                }
+                if (let Some(dv) <- v.defaultValue) {
+                    sb.append(" [default: ${dv}]")
                 }
             } else {
                 sb.append(tab)
