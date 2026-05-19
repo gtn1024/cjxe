@@ -11,9 +11,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - uses: Zxilly/setup-cangjie@v1.8.0
+      - uses: Zxilly/setup-cangjie@v2
         with:
-          channel: lts
+          channel: sts
+          version: 1.1.0
       - name: build
         shell: bash
         run: cjpm build
+      - name: test
+        shell: bash
+        run: cjpm test
