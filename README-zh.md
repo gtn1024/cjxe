@@ -1,36 +1,36 @@
 <div align="center">
   <h1>cjxe</h1>
-  <p>A Fast Command Line Argument Parser for Cangjie.</p>
+  <p>仓颉语言命令行参数解析库</p>
 </div>
 <p align="center">
   <img alt="" src="https://github.com/gtn1024/cjxe/actions/workflows/ci.yml/badge.svg" style="display: inline-block;" />
 </p>
 
-[中文文档](README-zh.md)
+[English](README.md)
 
-## Features
+## 特性
 
-- **Builder API**: Fluent interface for defining arguments, flags, options, and subcommands
-- **Automatic help and version**: Generates `-h`/`--help` and `-v`/`--version` automatically
-- **Subcommands**: Supports nested subcommands with their own arguments
-- **Positional arguments**: Index-based positional arguments with multiple-value support
-- **Validation**: Possible values, required arguments, mutual exclusion, and argument dependencies
-- **Error handling**: `ArgError` exception with usage hints
+- **Builder API**：流畅接口定义参数、标志、选项和子命令
+- **自动帮助和版本**：自动生成 `-h`/`--help` 和 `-v`/`--version`
+- **子命令**：支持嵌套子命令，子命令可以拥有自己的参数
+- **位置参数**：基于索引的位置参数，支持多值
+- **参数校验**：可选值限制、必填参数、互斥参数、参数依赖
+- **错误处理**：`ArgError` 异常附带用法提示
 
-## Prerequisites
+## 环境要求
 
-- Cangjie toolchain >= 1.1.0
+- 仓颉工具链 >= 1.1.0
 
-## Installation
+## 安装
 
-Add to your `cjpm.toml`:
+在 `cjpm.toml` 中添加依赖：
 
 ```toml
 [dependencies]
   cjxe = { git = "https://github.com/gtn1024/cjxe.git", tag = "0.2.0" }
 ```
 
-## Quick Start
+## 快速入门
 
 ```cangjie
 package demo
@@ -74,14 +74,14 @@ main() {
 }
 ```
 
-See [cjxe_examples](cjxe_examples) for more examples. For full API documentation, see [cjxe/README.md](cjxe/README.md).
+更多示例见 [cjxe_examples](cjxe_examples)。完整 API 文档见 [cjxe/README-zh.md](cjxe/README-zh.md)。
 
-## Running Tests
+## 运行测试
 
 ```bash
 cjpm test
 ```
 
-## License
+## 许可证
 
-Licensed under the [MIT License](LICENSE).
+基于 [MIT 许可证](LICENSE) 授权。
