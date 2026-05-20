@@ -634,7 +634,6 @@ public class App {
                     None<OptionBuilder>
                 }
             }
-            let numRequiredOpts = requiredOpts.count()
             let requiredOptsStr = requiredOpts.fold(StringBuilder()) { acc, o =>
                 let sb = StringBuilder("-")
                 if (let Some(l) <- o.long) {
