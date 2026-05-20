@@ -6,7 +6,7 @@ import std.env.{getCommandLine, exit}
 import std.fs.Path
 import std.collection.{HashMap, TreeMap, ArrayList, HashSet, TreeSet}
 
-const tab = "    "
+const TAB = "    "
 
 public class App {
     let _name: String
@@ -350,11 +350,11 @@ public class App {
         println("FLAGS:")
         for (v in this._flags.values()) {
             let sb = StringBuilder()
-            sb.append(tab)
+            sb.append(TAB)
             if (let Some(s) <- v.short) {
                 sb.append("-${s}")
             } else {
-                sb.append(tab)
+                sb.append(TAB)
             }
             if (let Some(l) <- v.long) {
                 if (v.short.isSome()) {
@@ -365,7 +365,7 @@ public class App {
             } else {
                 sb.append(this.getSpaces(longestFlag + 6))
             }
-            sb.append(v.help.getOrDefault { => tab })
+            sb.append(v.help.getOrDefault { => TAB })
             println(sb.toString())
         }
     }
@@ -376,11 +376,11 @@ public class App {
         for (v in this._opts.values()) {
             let mult = if (v.multiple) { 3 } else { 0 }
             let sb = StringBuilder()
-            sb.append(tab)
+            sb.append(TAB)
             if (let Some(s) <- v.short) {
                 sb.append("-${s}")
             } else {
-                sb.append(tab)
+                sb.append(TAB)
             }
             if (let Some(l) <- v.long) {
                 if (v.short.isSome()) {
@@ -412,7 +412,7 @@ public class App {
                     sb.append(" [default: ${dv}]")
                 }
             } else {
-                sb.append(tab)
+                sb.append(TAB)
             }
             println(sb.toString())
         }
@@ -424,7 +424,7 @@ public class App {
         for (v in this._positionalIdx.values()) {
             let mult = if (v.multiple) { 3 } else { 0 }
             let sb = StringBuilder()
-            sb.append(tab)
+            sb.append(TAB)
             if (v.multiple) {
                 sb.append("${v.name}...")
             } else {
@@ -444,7 +444,7 @@ public class App {
                     sb.append(" [default: ${dv}]")
                 }
             } else {
-                sb.append(tab)
+                sb.append(TAB)
             }
             println(sb.toString())
         }
@@ -455,13 +455,13 @@ public class App {
         println("SUBCOMMANDS:")
         for (sc in this._subcommands.values()) {
             let sb = StringBuilder()
-            sb.append(tab)
+            sb.append(TAB)
             sb.append(sc._name)
             sb.append(this.getSpaces((longestSubcommand + 4) - (sc._name.size)))
             if (let Some(a) <- sc._about) {
                 sb.append(a)
             } else {
-                sb.append(tab)
+                sb.append(TAB)
             }
             println(sb.toString())
         }
@@ -484,7 +484,8 @@ public class App {
         for (ol in this._opts.values().iterator().filterMap { o =>
             if (o.long.isSome()) {
                 let mult = if (o.multiple) { 3 } else { 0 }
-                Some(o.long.getOrThrow().size + mult + o.name.size + 3)
+                let longSize = if (let Some(l) <- o.long) { l.size } else { 0 }
+                Some(longSize + mult + o.name.size + 3)
             } else {
                 None<Int64>
             }
@@ -587,7 +588,7 @@ public class App {
     func createUsage(): String {
         let usage = StringBuilder()
         usage.append("USAGE:\n")
-        usage.append(tab)
+        usage.append(TAB)
         if (let Some(u) <- this._usageStr) {
             usage.append(u)
         } else {
@@ -638,8 +639,8 @@ public class App {
                 let sb = StringBuilder("-")
                 if (let Some(l) <- o.long) {
                     sb.append("-${l}")
-                } else {
-                    sb.append(o.short.getOrThrow())
+                } else if (let Some(s) <- o.short) {
+                    sb.append("${s}")
                 }
                 sb.append("${o.name} ")
                 acc.append(sb)
@@ -680,6 +681,7 @@ public class App {
         usage.toString()
     }
 
+    // @Throws ArgError
     func reportError(msg: String, usage: Bool) {
         throw ArgError(msg, showUsage: usage)
     }
@@ -860,51 +862,52 @@ public class App {
             return None
         }
         // short flag or opt
-        let argC = arg.runes().first().getOrThrow()
+        if (let Some(argC) <- arg.runes().first()) {
+            this.checkForHelpAndVersion(argC)
 
-        this.checkForHelpAndVersion(argC)
-
-        if (this.parseSingleShortFlag(matches, argC)) {
-            return None
-        }
-
-        if (let Some(v) <- this._opts.values().iterator().filter { opt => opt.short == argC}.first()) {
-            if (this._blacklist.contains(v.name)) {
-                this.reportError("Argument \"-${argC}\" cannot be used with one or more of the other specified arguments", true)
+            if (this.parseSingleShortFlag(matches, argC)) {
+                return None
             }
 
-            if (matches.args.contains(v.name)) {
-                if (!v.multiple) {
-                    this.reportError("Argument \"-${argC}\" cannot be specified more than once", true)
+            if (let Some(v) <- this._opts.values().iterator().filter { opt => opt.short == argC}.first()) {
+                if (this._blacklist.contains(v.name)) {
+                    this.reportError("Argument \"-${argC}\" cannot be used with one or more of the other specified arguments", true)
                 }
-            } else {
-                let ma = MatchedArg(v.name)
-                ma.occurrences = 0
-                ma.values = Some(ArrayList())
-                matches.args.add(v.name, ma)
-            }
-            if (let Some(bl) <- v.blacklist) {
-                for (name in bl) {
-                    this._blacklist.add(name)
-                    this._required.remove(name)
-                }
-            }
 
-            this._required.remove(v.name)
-
-            if (let Some(reqs) <- v.requires) {
-                for (n in reqs) {
-                    this._matchedReqs.add(n)
-                    if (matches.args.contains(n)) {
-                        continue
+                if (matches.args.contains(v.name)) {
+                    if (!v.multiple) {
+                        this.reportError("Argument \"-${argC}\" cannot be specified more than once", true)
                     }
-                    this._required.add(n)
+                } else {
+                    let ma = MatchedArg(v.name)
+                    ma.occurrences = 0
+                    ma.values = Some(ArrayList())
+                    matches.args.add(v.name, ma)
                 }
+                if (let Some(bl) <- v.blacklist) {
+                    for (name in bl) {
+                        this._blacklist.add(name)
+                        this._required.remove(name)
+                    }
+                }
+
+                this._required.remove(v.name)
+
+                if (let Some(reqs) <- v.requires) {
+                    for (n in reqs) {
+                        this._matchedReqs.add(n)
+                        if (matches.args.contains(n)) {
+                            continue
+                        }
+                        this._required.add(n)
+                    }
+                }
+                return Some(v.name)
             }
-            return Some(v.name)
+
+            this.reportError("Argument -${arg} is not valid", true)
         }
 
-        this.reportError("Argument -${arg} is not valid", true)
         None
     }
 
