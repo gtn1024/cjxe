@@ -1,10 +1,8 @@
-<div align="center">
-  <h1>cjxe</h1>
-  <p>A Fast Command Line Argument Parser for Cangjie.</p>
-</div>
-<p align="center">
-  <img alt="" src="https://github.com/gtn1024/cjxe/actions/workflows/ci.yml/badge.svg" style="display: inline-block;" />
-</p>
+# cjxe
+
+A Fast Command Line Argument Parser for Cangjie.
+
+![CI](https://github.com/gtn1024/cjxe/actions/workflows/ci.yml/badge.svg) [![cjxe version](https://badge.awesomecangjie.com/badge/cjxe/version)](https://pkg.cangjie-lang.cn/package/cjxe)
 
 [中文文档](README-zh.md)
 

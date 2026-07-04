@@ -1,10 +1,8 @@
-<div align="center">
-  <h1>cjxe</h1>
-  <p>仓颉语言命令行参数解析库</p>
-</div>
-<p align="center">
-  <img alt="" src="https://github.com/gtn1024/cjxe/actions/workflows/ci.yml/badge.svg" style="display: inline-block;" />
-</p>
+# cjxe
+
+仓颉语言命令行参数解析库
+
+![CI](https://github.com/gtn1024/cjxe/actions/workflows/ci.yml/badge.svg) [![cjxe version](https://badge.awesomecangjie.com/badge/cjxe/version)](https://pkg.cangjie-lang.cn/package/cjxe)
 
 [English](README.md)
 
